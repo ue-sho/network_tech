@@ -1,3 +1,11 @@
+/**
+ * @file print.h
+ * @brief
+ */
+
+#ifndef PRINT_H_
+#define PRINT_H_
+
 char *my_ether_ntoa_r(u_char *hwaddr, char *buf, socklen_t size);
 char *arp_ip2str(u_int8_t *ip, char *buf, socklen_t size);
 char *ip_ip2str(u_int32_t ip, char *buf, socklen_t size);
@@ -9,3 +17,5 @@ int PrintIcmp(struct icmp *icmp, FILE *fp);
 int PrintIcmp6(struct icmp6_hdr *icmp6, FILE *fp);
 int PrintTcp(struct tcphdr *tcphdr, FILE *fp);
 int PrintUdp(struct udphdr *udphdr, FILE *fp);
+
+#endif
