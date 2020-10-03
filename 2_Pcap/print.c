@@ -1,3 +1,8 @@
+/**
+ * @file print.c
+ * @brief キャプチャした情報を出力する関数群の実装ファイル
+ */
+
 #include <arpa/inet.h>
 #include <linux/if.h>
 #include <net/ethernet.h>
@@ -19,40 +24,67 @@
 #define ETHERTYPE_IPV6 0x86dd
 #endif
 
+/**
+ * @brief MACアドレスを文字列にする
+ * @param hwaddr : MACアドレス
+ * @param buf : MACアドレスの文字列格納用のバッファ
+ * @param size : ソケットのサイズ
+ * @return MACアドレスの文字列
+ */
 char *my_ether_ntoa_r(u_char *hwaddr, char *buf, socklen_t size)
 {
     snprintf(buf, size, "%02x:%02x:%02x:%02x:%02x:%02x",
              hwaddr[0], hwaddr[1], hwaddr[2], hwaddr[3], hwaddr[4], hwaddr[5]);
 
-    return (buf);
+    return buf;
 }
 
+/**
+ * @brief u_int8_t用IPアドレスを文字列にする
+ * @param ip : MACアドレス
+ * @param buf : MACアドレスの文字列格納用のバッファ
+ * @param size : ソケットのサイズ
+ * @return MACアドレスの文字列
+ */
 char *arp_ip2str(u_int8_t *ip, char *buf, socklen_t size)
 {
     snprintf(buf, size, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
 
-    return (buf);
+    return buf;
 }
 
+/**
+ * @brief u_int32_t用IPアドレスを文字列にする
+ * @param ip : MACアドレス
+ * @param buf : MACアドレスの文字列格納用のバッファ
+ * @param size : ソケットのサイズ
+ * @return MACアドレスの文字列
+ */
 char *ip_ip2str(u_int32_t ip, char *buf, socklen_t size)
 {
-    struct in_addr *addr;
+    struct in_addr *addr = NULL;
 
     addr = (struct in_addr *)&ip;
     inet_ntop(AF_INET, addr, buf, size);
 
-    return (buf);
+    return buf;
 }
 
-int PrintEtherHeader(struct ether_header *eh, FILE *fp)
+/**
+ * @brief Etherヘッダを表示する
+ * @param ether_hdr : Ethernetヘッダ情報
+ * @param fp : 出力先ファイルポインタ
+ * @return 成功
+ */
+int PrintEtherHeader(struct ether_header *ether_hdr, FILE *fp)
 {
-    char buf[80];
+    char buf[80] = {'\0'};
 
     fprintf(fp, "ether_header----------------------------\n");
-    fprintf(fp, "ether_dhost=%s\n", my_ether_ntoa_r(eh->ether_dhost, buf, sizeof(buf)));
-    fprintf(fp, "ether_shost=%s\n", my_ether_ntoa_r(eh->ether_shost, buf, sizeof(buf)));
-    fprintf(fp, "ether_type=%02X", ntohs(eh->ether_type));
-    switch (ntohs(eh->ether_type)) {
+    fprintf(fp, "ether_dhost=%s\n", my_ether_ntoa_r(ether_hdr->ether_dhost, buf, sizeof(buf)));  // destination eth addr
+    fprintf(fp, "ether_shost=%s\n", my_ether_ntoa_r(ether_hdr->ether_shost, buf, sizeof(buf)));  // source ether addr
+    fprintf(fp, "ether_type=%02X", ntohs(ether_hdr->ether_type));                                // packet type ID field
+    switch (ntohs(ether_hdr->ether_type)) {
     case ETH_P_IP:
         fprintf(fp, "(IP)\n");
         break;
@@ -67,10 +99,16 @@ int PrintEtherHeader(struct ether_header *eh, FILE *fp)
         break;
     }
 
-    return (0);
+    return 0;
 }
 
-int PrintArp(struct ether_arp *arp, FILE *fp)
+/**
+ * @brief ARP情報を表示する
+ * @param eth_arp : ARP情報
+ * @param fp : 出力先ファイルポインタ
+ * @return 成功
+ */
+int PrintArp(struct ether_arp *eth_arp, FILE *fp)
 {
     static char *hrd[] = {
         "From KA9Q: NET/ROM pseudo.",
@@ -109,18 +147,18 @@ int PrintArp(struct ether_arp *arp, FILE *fp)
         "InARP request.",
         "InARP reply.",
         "(ATM)ARP NAK."};
-    char buf[80];
+    char buf[80] = {'\0'};
 
     fprintf(fp, "arp-------------------------------------\n");
-    fprintf(fp, "arp_hrd=%u", ntohs(arp->arp_hrd));
-    if (ntohs(arp->arp_hrd) <= 23) {
-        fprintf(fp, "(%s),", hrd[ntohs(arp->arp_hrd)]);
+    fprintf(fp, "arp_hrd=%u", ntohs(eth_arp->arp_hrd));
+    if (ntohs(eth_arp->arp_hrd) <= 23) {
+        fprintf(fp, "(%s),", hrd[ntohs(eth_arp->arp_hrd)]);
     }
     else {
         fprintf(fp, "(undefined),");
     }
-    fprintf(fp, "arp_pro=%u", ntohs(arp->arp_pro));
-    switch (ntohs(arp->arp_pro)) {
+    fprintf(fp, "arp_pro=%u", ntohs(eth_arp->arp_pro));
+    switch (ntohs(eth_arp->arp_pro)) {
     case ETHERTYPE_IP:
         fprintf(fp, "(IP)\n");
         break;
@@ -137,23 +175,24 @@ int PrintArp(struct ether_arp *arp, FILE *fp)
         fprintf(fp, "(unknown)\n");
         break;
     }
-    fprintf(fp, "arp_hln=%u,", arp->arp_hln);
-    fprintf(fp, "arp_pln=%u,", arp->arp_pln);
-    fprintf(fp, "arp_op=%u", ntohs(arp->arp_op));
-    if (ntohs(arp->arp_op) <= 10) {
-        fprintf(fp, "(%s)\n", op[ntohs(arp->arp_op)]);
+    fprintf(fp, "arp_hln=%u,", eth_arp->arp_hln);
+    fprintf(fp, "arp_pln=%u,", eth_arp->arp_pln);
+    fprintf(fp, "arp_op=%u", ntohs(eth_arp->arp_op));
+    if (ntohs(eth_arp->arp_op) <= 10) {
+        fprintf(fp, "(%s)\n", op[ntohs(eth_arp->arp_op)]);
     }
     else {
         fprintf(fp, "(undefine)\n");
     }
-    fprintf(fp, "arp_sha=%s\n", my_ether_ntoa_r(arp->arp_sha, buf, sizeof(buf)));
-    fprintf(fp, "arp_spa=%s\n", arp_ip2str(arp->arp_spa, buf, sizeof(buf)));
-    fprintf(fp, "arp_tha=%s\n", my_ether_ntoa_r(arp->arp_tha, buf, sizeof(buf)));
-    fprintf(fp, "arp_tpa=%s\n", arp_ip2str(arp->arp_spa, buf, sizeof(buf)));
+    fprintf(fp, "arp_sha=%s\n", my_ether_ntoa_r(eth_arp->arp_sha, buf, sizeof(buf)));
+    fprintf(fp, "arp_spa=%s\n", arp_ip2str(eth_arp->arp_spa, buf, sizeof(buf)));
+    fprintf(fp, "arp_tha=%s\n", my_ether_ntoa_r(eth_arp->arp_tha, buf, sizeof(buf)));
+    fprintf(fp, "arp_tpa=%s\n", arp_ip2str(eth_arp->arp_spa, buf, sizeof(buf)));
 
-    return (0);
+    return 0;
 }
 
+//! プロトコル
 static char *Proto[] = {
     "undefined",
     "ICMP",
@@ -174,29 +213,35 @@ static char *Proto[] = {
     "undefined",
     "UDP"};
 
-int PrintIpHeader(struct iphdr *iphdr, u_char *option, int optionLen, FILE *fp)
+/**
+ * @brief IPヘッダを表示する
+ * @param ip_hdr : IPヘッダ情報
+ * @param fp : 出力先ファイルポインタ
+ * @return 成功
+ */
+int PrintIpHeader(struct iphdr *ip_hdr, u_char *option, int optionLen, FILE *fp)
 {
-    int i;
-    char buf[80];
+    int i = 0;
+    char buf[80] = {'\0'};
 
     fprintf(fp, "ip--------------------------------------\n");
-    fprintf(fp, "version=%u,", iphdr->version);
-    fprintf(fp, "ihl=%u,", iphdr->ihl);
-    fprintf(fp, "tos=%x,", iphdr->tos);
-    fprintf(fp, "tot_len=%u,", ntohs(iphdr->tot_len));
-    fprintf(fp, "id=%u\n", ntohs(iphdr->id));
-    fprintf(fp, "frag_off=%x,%u,", (ntohs(iphdr->frag_off) >> 13) & 0x07, ntohs(iphdr->frag_off) & 0x1FFF);
-    fprintf(fp, "ttl=%u,", iphdr->ttl);
-    fprintf(fp, "protocol=%u", iphdr->protocol);
-    if (iphdr->protocol <= 17) {
-        fprintf(fp, "(%s),", Proto[iphdr->protocol]);
+    fprintf(fp, "version=%u,", ip_hdr->version);
+    fprintf(fp, "ihl=%u,", ip_hdr->ihl);
+    fprintf(fp, "tos=%x,", ip_hdr->tos);
+    fprintf(fp, "tot_len=%u,", ntohs(ip_hdr->tot_len));
+    fprintf(fp, "id=%u\n", ntohs(ip_hdr->id));
+    fprintf(fp, "frag_off=%x,%u,", (ntohs(ip_hdr->frag_off) >> 13) & 0x07, ntohs(ip_hdr->frag_off) & 0x1FFF);
+    fprintf(fp, "ttl=%u,", ip_hdr->ttl);
+    fprintf(fp, "protocol=%u", ip_hdr->protocol);
+    if (ip_hdr->protocol <= 17) {
+        fprintf(fp, "(%s),", Proto[ip_hdr->protocol]);
     }
     else {
         fprintf(fp, "(undefined),");
     }
-    fprintf(fp, "check=%x\n", iphdr->check);
-    fprintf(fp, "saddr=%s,", ip_ip2str(iphdr->saddr, buf, sizeof(buf)));
-    fprintf(fp, "daddr=%s\n", ip_ip2str(iphdr->daddr, buf, sizeof(buf)));
+    fprintf(fp, "check=%x\n", ip_hdr->check);
+    fprintf(fp, "saddr=%s,", ip_ip2str(ip_hdr->saddr, buf, sizeof(buf)));
+    fprintf(fp, "daddr=%s\n", ip_ip2str(ip_hdr->daddr, buf, sizeof(buf)));
     if (optionLen > 0) {
         fprintf(fp, "option:");
         for (i = 0; i < optionLen; i++) {
@@ -209,32 +254,44 @@ int PrintIpHeader(struct iphdr *iphdr, u_char *option, int optionLen, FILE *fp)
         }
     }
 
-    return (0);
+    return 0;
 }
 
-int PrintIp6Header(struct ip6_hdr *ip6, FILE *fp)
+/**
+ * @brief IPv6ヘッダを表示する
+ * @param ip6_hdr : IPv6ヘッダ情報
+ * @param fp : 出力先ファイルポインタ
+ * @return 成功
+ */
+int PrintIp6Header(struct ip6_hdr *ip6_hdr, FILE *fp)
 {
     char buf[80];
 
     fprintf(fp, "ip6-------------------------------------\n");
 
-    fprintf(fp, "ip6_flow=%x,", ip6->ip6_flow);
-    fprintf(fp, "ip6_plen=%d,", ntohs(ip6->ip6_plen));
-    fprintf(fp, "ip6_nxt=%u", ip6->ip6_nxt);
-    if (ip6->ip6_nxt <= 17) {
-        fprintf(fp, "(%s),", Proto[ip6->ip6_nxt]);
+    fprintf(fp, "ip6_flow=%x,", ip6_hdr->ip6_flow);
+    fprintf(fp, "ip6_plen=%d,", ntohs(ip6_hdr->ip6_plen));
+    fprintf(fp, "ip6_nxt=%u", ip6_hdr->ip6_nxt);
+    if (ip6_hdr->ip6_nxt <= 17) {
+        fprintf(fp, "(%s),", Proto[ip6_hdr->ip6_nxt]);
     }
     else {
         fprintf(fp, "(undefined),");
     }
-    fprintf(fp, "ip6_hlim=%d,", ip6->ip6_hlim);
+    fprintf(fp, "ip6_hlim=%d,", ip6_hdr->ip6_hlim);
 
-    fprintf(fp, "ip6_src=%s\n", inet_ntop(AF_INET6, &ip6->ip6_src, buf, sizeof(buf)));
-    fprintf(fp, "ip6_dst=%s\n", inet_ntop(AF_INET6, &ip6->ip6_dst, buf, sizeof(buf)));
+    fprintf(fp, "ip6_src=%s\n", inet_ntop(AF_INET6, &ip6_hdr->ip6_src, buf, sizeof(buf)));
+    fprintf(fp, "ip6_dst=%s\n", inet_ntop(AF_INET6, &ip6_hdr->ip6_dst, buf, sizeof(buf)));
 
-    return (0);
+    return 0;
 }
 
+/**
+ * @brief ICMP情報を表示する
+ * @param icmp : ICMP情報
+ * @param fp : 出力先ファイルポインタ
+ * @return 成功
+ */
 int PrintIcmp(struct icmp *icmp, FILE *fp)
 {
     static char *icmp_type[] = {
@@ -275,9 +332,15 @@ int PrintIcmp(struct icmp *icmp, FILE *fp)
         fprintf(fp, "icmp_seq=%u\n", ntohs(icmp->icmp_seq));
     }
 
-    return (0);
+    return 0;
 }
 
+/**
+ * @brief ICMP6情報を表示する
+ * @param icmp6 : ICMP6情報
+ * @param fp : 出力先ファイルポインタ
+ * @return 成功
+ */
 int PrintIcmp6(struct icmp6_hdr *icmp6, FILE *fp)
 {
     fprintf(fp, "icmp6-----------------------------------\n");
@@ -312,39 +375,51 @@ int PrintIcmp6(struct icmp6_hdr *icmp6, FILE *fp)
         fprintf(fp, "icmp6_seq=%u\n", ntohs(icmp6->icmp6_seq));
     }
 
-    return (0);
+    return 0;
 }
 
-int PrintTcp(struct tcphdr *tcphdr, FILE *fp)
+/**
+ * @brief TCP情報を表示する
+ * @param tcp : TCP情報
+ * @param fp : 出力先ファイルポインタ
+ * @return 成功
+ */
+int PrintTcp(struct tcphdr *tcp, FILE *fp)
 {
     fprintf(fp, "tcp-------------------------------------\n");
 
-    fprintf(fp, "source=%u,", ntohs(tcphdr->source));
-    fprintf(fp, "dest=%u\n", ntohs(tcphdr->dest));
-    fprintf(fp, "seq=%u\n", ntohl(tcphdr->seq));
-    fprintf(fp, "ack_seq=%u\n", ntohl(tcphdr->ack_seq));
-    fprintf(fp, "doff=%u,", tcphdr->doff);
-    fprintf(fp, "urg=%u,", tcphdr->urg);
-    fprintf(fp, "ack=%u,", tcphdr->ack);
-    fprintf(fp, "psh=%u,", tcphdr->psh);
-    fprintf(fp, "rst=%u,", tcphdr->rst);
-    fprintf(fp, "syn=%u,", tcphdr->syn);
-    fprintf(fp, "fin=%u,", tcphdr->fin);
-    fprintf(fp, "th_win=%u\n", ntohs(tcphdr->window));
-    fprintf(fp, "th_sum=%u,", ntohs(tcphdr->check));
-    fprintf(fp, "th_urp=%u\n", ntohs(tcphdr->urg_ptr));
+    fprintf(fp, "source=%u,", ntohs(tcp->source));
+    fprintf(fp, "dest=%u\n", ntohs(tcp->dest));
+    fprintf(fp, "seq=%u\n", ntohl(tcp->seq));
+    fprintf(fp, "ack_seq=%u\n", ntohl(tcp->ack_seq));
+    fprintf(fp, "doff=%u,", tcp->doff);
+    fprintf(fp, "urg=%u,", tcp->urg);
+    fprintf(fp, "ack=%u,", tcp->ack);
+    fprintf(fp, "psh=%u,", tcp->psh);
+    fprintf(fp, "rst=%u,", tcp->rst);
+    fprintf(fp, "syn=%u,", tcp->syn);
+    fprintf(fp, "fin=%u,", tcp->fin);
+    fprintf(fp, "th_win=%u\n", ntohs(tcp->window));
+    fprintf(fp, "th_sum=%u,", ntohs(tcp->check));
+    fprintf(fp, "th_urp=%u\n", ntohs(tcp->urg_ptr));
 
-    return (0);
+    return 0;
 }
 
-int PrintUdp(struct udphdr *udphdr, FILE *fp)
+/**
+ * @brief UDP情報を表示する
+ * @param udp : UDP情報
+ * @param fp : 出力先ファイルポインタ
+ * @return 成功
+ */
+int PrintUdp(struct udphdr *udp, FILE *fp)
 {
     fprintf(fp, "udp-------------------------------------\n");
 
-    fprintf(fp, "source=%u,", ntohs(udphdr->source));
-    fprintf(fp, "dest=%u\n", ntohs(udphdr->dest));
-    fprintf(fp, "len=%u,", ntohs(udphdr->len));
-    fprintf(fp, "check=%x\n", ntohs(udphdr->check));
+    fprintf(fp, "source=%u,", ntohs(udp->source));
+    fprintf(fp, "dest=%u\n", ntohs(udp->dest));
+    fprintf(fp, "len=%u,", ntohs(udp->len));
+    fprintf(fp, "check=%x\n", ntohs(udp->check));
 
-    return (0);
+    return 0;
 }

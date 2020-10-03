@@ -1,6 +1,6 @@
 /**
  * @file checksum.c
- * @brief
+ * @brief チェックサムをチャックするための関数群のヘッダファイル
  */
 
 #ifndef CHECKSUM_H_

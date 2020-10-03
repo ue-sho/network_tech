@@ -1,6 +1,6 @@
 /**
  * @file analyze.c
- * @brief
+ * @brief 受信したパケットを解析する関数群のヘッダファイル
  */
 
 #ifndef ANALYZE_H_
