@@ -171,5 +171,5 @@ int main(int argc, char *argv[], char *envp[])
 
     close(soc);
 
-    return (0);
+    return 0;
 }
