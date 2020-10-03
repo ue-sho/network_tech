@@ -92,7 +92,7 @@ int InitRawSocket(char *device, int promiscFlag, int ipOnly)
 }
 
 /**
- * @brief MACアドレスを文字列にする (debug用)
+ * @brief MACアドレスを文字列にする
  * @param hwaddr : MACアドレス
  * @param buf : MACアドレスの文字列格納用のバッファ
  * @param size : ソケットのサイズ
@@ -107,20 +107,20 @@ char *my_ether_ntoa_r(u_char *hwaddr, char *buf, socklen_t size)
 }
 
 /**
- * @brief Etherヘッダをデバッグ表示する
- * @param eh : Ethernetヘッダ情報
+ * @brief Etherヘッダを表示する
+ * @param ether_hdr : Ethernetヘッダ情報
  * @param fp : 出力先ファイルポインタ
  * @return 成功
  */
-int PrintEtherHeader(struct ether_header *eh, FILE *fp)
+int PrintEtherHeader(struct ether_header *ether_hdr, FILE *fp)
 {
     char buf[80] = {'\0'};
 
     fprintf(fp, "ether_header----------------------------\n");
-    fprintf(fp, "ether_dhost=%s\n", my_ether_ntoa_r(eh->ether_dhost, buf, sizeof(buf)));  // destination eth addr
-    fprintf(fp, "ether_shost=%s\n", my_ether_ntoa_r(eh->ether_shost, buf, sizeof(buf)));  // source ether addr
-    fprintf(fp, "ether_type=%02X", ntohs(eh->ether_type));                                // packet type ID field
-    switch (ntohs(eh->ether_type)) {
+    fprintf(fp, "ether_dhost=%s\n", my_ether_ntoa_r(ether_hdr->ether_dhost, buf, sizeof(buf)));  // destination eth addr
+    fprintf(fp, "ether_shost=%s\n", my_ether_ntoa_r(ether_hdr->ether_shost, buf, sizeof(buf)));  // source ether addr
+    fprintf(fp, "ether_type=%02X", ntohs(ether_hdr->ether_type));                                // packet type ID field
+    switch (ntohs(ether_hdr->ether_type)) {
     case ETH_P_IP:
         fprintf(fp, "(IP)\n");
         break;
