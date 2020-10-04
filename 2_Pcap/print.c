@@ -80,7 +80,7 @@ int PrintEtherHeader(struct ether_header *ether_hdr, FILE *fp)
 {
     char buf[80] = {'\0'};
 
-    fprintf(fp, "ether_header----------------------------\n");
+    fprintf(fp, "\nether_header----------------------------\n");
     fprintf(fp, "ether_dhost=%s\n", my_ether_ntoa_r(ether_hdr->ether_dhost, buf, sizeof(buf)));  // destination eth addr
     fprintf(fp, "ether_shost=%s\n", my_ether_ntoa_r(ether_hdr->ether_shost, buf, sizeof(buf)));  // source ether addr
     fprintf(fp, "ether_type=%02X", ntohs(ether_hdr->ether_type));                                // packet type ID field
@@ -149,13 +149,13 @@ int PrintArp(struct ether_arp *eth_arp, FILE *fp)
         "(ATM)ARP NAK."};
     char buf[80] = {'\0'};
 
-    fprintf(fp, "arp-------------------------------------\n");
+    fprintf(fp, "\narp-------------------------------------\n");
     fprintf(fp, "arp_hrd=%u", ntohs(eth_arp->arp_hrd));
     if (ntohs(eth_arp->arp_hrd) <= 23) {
-        fprintf(fp, "(%s),", hrd[ntohs(eth_arp->arp_hrd)]);
+        fprintf(fp, "(%s)\n", hrd[ntohs(eth_arp->arp_hrd)]);
     }
     else {
-        fprintf(fp, "(undefined),");
+        fprintf(fp, "(undefined)\n");
     }
     fprintf(fp, "arp_pro=%u", ntohs(eth_arp->arp_pro));
     switch (ntohs(eth_arp->arp_pro)) {
@@ -175,8 +175,8 @@ int PrintArp(struct ether_arp *eth_arp, FILE *fp)
         fprintf(fp, "(unknown)\n");
         break;
     }
-    fprintf(fp, "arp_hln=%u,", eth_arp->arp_hln);
-    fprintf(fp, "arp_pln=%u,", eth_arp->arp_pln);
+    fprintf(fp, "arp_hln=%u\n", eth_arp->arp_hln);
+    fprintf(fp, "arp_pln=%u\n", eth_arp->arp_pln);
     fprintf(fp, "arp_op=%u", ntohs(eth_arp->arp_op));
     if (ntohs(eth_arp->arp_op) <= 10) {
         fprintf(fp, "(%s)\n", op[ntohs(eth_arp->arp_op)]);
@@ -224,23 +224,23 @@ int PrintIpHeader(struct iphdr *ip_hdr, u_char *option, int optionLen, FILE *fp)
     int i = 0;
     char buf[80] = {'\0'};
 
-    fprintf(fp, "ip--------------------------------------\n");
-    fprintf(fp, "version=%u,", ip_hdr->version);
-    fprintf(fp, "ihl=%u,", ip_hdr->ihl);
-    fprintf(fp, "tos=%x,", ip_hdr->tos);
-    fprintf(fp, "tot_len=%u,", ntohs(ip_hdr->tot_len));
+    fprintf(fp, "\nip--------------------------------------\n");
+    fprintf(fp, "version=%u\n", ip_hdr->version);
+    fprintf(fp, "ihl=%u\n", ip_hdr->ihl);
+    fprintf(fp, "tos=%x\n", ip_hdr->tos);
+    fprintf(fp, "tot_len=%u\n", ntohs(ip_hdr->tot_len));
     fprintf(fp, "id=%u\n", ntohs(ip_hdr->id));
-    fprintf(fp, "frag_off=%x,%u,", (ntohs(ip_hdr->frag_off) >> 13) & 0x07, ntohs(ip_hdr->frag_off) & 0x1FFF);
-    fprintf(fp, "ttl=%u,", ip_hdr->ttl);
+    fprintf(fp, "frag_off=%x,%u\n", (ntohs(ip_hdr->frag_off) >> 13) & 0x07, ntohs(ip_hdr->frag_off) & 0x1FFF);
+    fprintf(fp, "ttl=%u\n", ip_hdr->ttl);
     fprintf(fp, "protocol=%u", ip_hdr->protocol);
     if (ip_hdr->protocol <= 17) {
-        fprintf(fp, "(%s),", Proto[ip_hdr->protocol]);
+        fprintf(fp, "(%s)\n", Proto[ip_hdr->protocol]);
     }
     else {
-        fprintf(fp, "(undefined),");
+        fprintf(fp, "(undefined)\n");
     }
     fprintf(fp, "check=%x\n", ip_hdr->check);
-    fprintf(fp, "saddr=%s,", ip_ip2str(ip_hdr->saddr, buf, sizeof(buf)));
+    fprintf(fp, "saddr=%s\n", ip_ip2str(ip_hdr->saddr, buf, sizeof(buf)));
     fprintf(fp, "daddr=%s\n", ip_ip2str(ip_hdr->daddr, buf, sizeof(buf)));
     if (optionLen > 0) {
         fprintf(fp, "option:");
@@ -267,18 +267,18 @@ int PrintIp6Header(struct ip6_hdr *ip6_hdr, FILE *fp)
 {
     char buf[80];
 
-    fprintf(fp, "ip6-------------------------------------\n");
+    fprintf(fp, "\nip6-------------------------------------\n");
 
-    fprintf(fp, "ip6_flow=%x,", ip6_hdr->ip6_flow);
-    fprintf(fp, "ip6_plen=%d,", ntohs(ip6_hdr->ip6_plen));
+    fprintf(fp, "ip6_flow=%x\n", ip6_hdr->ip6_flow);
+    fprintf(fp, "ip6_plen=%d\n", ntohs(ip6_hdr->ip6_plen));
     fprintf(fp, "ip6_nxt=%u", ip6_hdr->ip6_nxt);
     if (ip6_hdr->ip6_nxt <= 17) {
-        fprintf(fp, "(%s),", Proto[ip6_hdr->ip6_nxt]);
+        fprintf(fp, "(%s)\n", Proto[ip6_hdr->ip6_nxt]);
     }
     else {
-        fprintf(fp, "(undefined),");
+        fprintf(fp, "(undefined\n");
     }
-    fprintf(fp, "ip6_hlim=%d,", ip6_hdr->ip6_hlim);
+    fprintf(fp, "ip6_hlim=%d\n", ip6_hdr->ip6_hlim);
 
     fprintf(fp, "ip6_src=%s\n", inet_ntop(AF_INET6, &ip6_hdr->ip6_src, buf, sizeof(buf)));
     fprintf(fp, "ip6_dst=%s\n", inet_ntop(AF_INET6, &ip6_hdr->ip6_dst, buf, sizeof(buf)));
@@ -315,20 +315,20 @@ int PrintIcmp(struct icmp *icmp, FILE *fp)
         "Address Mask Request",
         "Address Mask Reply"};
 
-    fprintf(fp, "icmp------------------------------------\n");
+    fprintf(fp, "\nicmp------------------------------------\n");
 
     fprintf(fp, "icmp_type=%u", icmp->icmp_type);
     if (icmp->icmp_type <= 18) {
-        fprintf(fp, "(%s),", icmp_type[icmp->icmp_type]);
+        fprintf(fp, "(%s)\n", icmp_type[icmp->icmp_type]);
     }
     else {
-        fprintf(fp, "(undefined),");
+        fprintf(fp, "(undefined)\n");
     }
-    fprintf(fp, "icmp_code=%u,", icmp->icmp_code);
+    fprintf(fp, "icmp_code=%u\n", icmp->icmp_code);
     fprintf(fp, "icmp_cksum=%u\n", ntohs(icmp->icmp_cksum));
 
     if (icmp->icmp_type == 0 || icmp->icmp_type == 8) {
-        fprintf(fp, "icmp_id=%u,", ntohs(icmp->icmp_id));
+        fprintf(fp, "icmp_id=%u\n", ntohs(icmp->icmp_id));
         fprintf(fp, "icmp_seq=%u\n", ntohs(icmp->icmp_seq));
     }
 
@@ -343,35 +343,35 @@ int PrintIcmp(struct icmp *icmp, FILE *fp)
  */
 int PrintIcmp6(struct icmp6_hdr *icmp6, FILE *fp)
 {
-    fprintf(fp, "icmp6-----------------------------------\n");
+    fprintf(fp, "\nicmp6-----------------------------------\n");
 
     fprintf(fp, "icmp6_type=%u", icmp6->icmp6_type);
     if (icmp6->icmp6_type == 1) {
-        fprintf(fp, "(Destination Unreachable),");
+        fprintf(fp, "(Destination Unreachable)\n");
     }
     else if (icmp6->icmp6_type == 2) {
-        fprintf(fp, "(Packet too Big),");
+        fprintf(fp, "(Packet too Big)\n");
     }
     else if (icmp6->icmp6_type == 3) {
-        fprintf(fp, "(Time Exceeded),");
+        fprintf(fp, "(Time Exceeded)\n");
     }
     else if (icmp6->icmp6_type == 4) {
-        fprintf(fp, "(Parameter Problem),");
+        fprintf(fp, "(Parameter Problem)\n");
     }
     else if (icmp6->icmp6_type == 128) {
-        fprintf(fp, "(Echo Request),");
+        fprintf(fp, "(Echo Request)\n");
     }
     else if (icmp6->icmp6_type == 129) {
-        fprintf(fp, "(Echo Reply),");
+        fprintf(fp, "(Echo Reply)\n");
     }
     else {
-        fprintf(fp, "(undefined),");
+        fprintf(fp, "(undefined)\n");
     }
-    fprintf(fp, "icmp6_code=%u,", icmp6->icmp6_code);
+    fprintf(fp, "icmp6_code=%u\n", icmp6->icmp6_code);
     fprintf(fp, "icmp6_cksum=%u\n", ntohs(icmp6->icmp6_cksum));
 
     if (icmp6->icmp6_type == 128 || icmp6->icmp6_type == 129) {
-        fprintf(fp, "icmp6_id=%u,", ntohs(icmp6->icmp6_id));
+        fprintf(fp, "icmp6_id=%u\n", ntohs(icmp6->icmp6_id));
         fprintf(fp, "icmp6_seq=%u\n", ntohs(icmp6->icmp6_seq));
     }
 
@@ -386,21 +386,21 @@ int PrintIcmp6(struct icmp6_hdr *icmp6, FILE *fp)
  */
 int PrintTcp(struct tcphdr *tcp, FILE *fp)
 {
-    fprintf(fp, "tcp-------------------------------------\n");
+    fprintf(fp, "\ntcp-------------------------------------\n");
 
-    fprintf(fp, "source=%u,", ntohs(tcp->source));
+    fprintf(fp, "source=%u\n", ntohs(tcp->source));
     fprintf(fp, "dest=%u\n", ntohs(tcp->dest));
     fprintf(fp, "seq=%u\n", ntohl(tcp->seq));
     fprintf(fp, "ack_seq=%u\n", ntohl(tcp->ack_seq));
-    fprintf(fp, "doff=%u,", tcp->doff);
-    fprintf(fp, "urg=%u,", tcp->urg);
-    fprintf(fp, "ack=%u,", tcp->ack);
-    fprintf(fp, "psh=%u,", tcp->psh);
-    fprintf(fp, "rst=%u,", tcp->rst);
-    fprintf(fp, "syn=%u,", tcp->syn);
-    fprintf(fp, "fin=%u,", tcp->fin);
+    fprintf(fp, "doff=%u\n", tcp->doff);
+    fprintf(fp, "urg=%u\n", tcp->urg);
+    fprintf(fp, "ack=%u\n", tcp->ack);
+    fprintf(fp, "psh=%u\n", tcp->psh);
+    fprintf(fp, "rst=%u\n", tcp->rst);
+    fprintf(fp, "syn=%u\n", tcp->syn);
+    fprintf(fp, "fin=%u\n", tcp->fin);
     fprintf(fp, "th_win=%u\n", ntohs(tcp->window));
-    fprintf(fp, "th_sum=%u,", ntohs(tcp->check));
+    fprintf(fp, "th_sum=%u\n", ntohs(tcp->check));
     fprintf(fp, "th_urp=%u\n", ntohs(tcp->urg_ptr));
 
     return 0;
@@ -414,11 +414,11 @@ int PrintTcp(struct tcphdr *tcp, FILE *fp)
  */
 int PrintUdp(struct udphdr *udp, FILE *fp)
 {
-    fprintf(fp, "udp-------------------------------------\n");
+    fprintf(fp, "\nudp-------------------------------------\n");
 
-    fprintf(fp, "source=%u,", ntohs(udp->source));
+    fprintf(fp, "source=%u\n", ntohs(udp->source));
     fprintf(fp, "dest=%u\n", ntohs(udp->dest));
-    fprintf(fp, "len=%u,", ntohs(udp->len));
+    fprintf(fp, "len=%u\n", ntohs(udp->len));
     fprintf(fp, "check=%x\n", ntohs(udp->check));
 
     return 0;

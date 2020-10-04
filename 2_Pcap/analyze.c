@@ -310,7 +310,7 @@ int AnalyzePacket(u_char *data, int size)
 {
     u_char *ptr = NULL;
     int lest = 0;
-    struct ether_header *eh = NULL;
+    struct ether_header *eth_hdr = NULL;
 
     ptr = data;
     lest = size;
@@ -319,23 +319,23 @@ int AnalyzePacket(u_char *data, int size)
         fprintf(stderr, "lest(%d) < sizeof(struct ether_header)\n", lest);
         return -1;
     }
-    eh = (struct ether_header *)ptr;
+    eth_hdr = (struct ether_header *)ptr;
     ptr += sizeof(struct ether_header);
     lest -= sizeof(struct ether_header);
 
-    if (ntohs(eh->ether_type) == ETHERTYPE_ARP) {
-        fprintf(stderr, "Packet[%dbytes]\n", size);
-        PrintEtherHeader(eh, stdout);
+    if (ntohs(eth_hdr->ether_type) == ETHERTYPE_ARP) {
+        fprintf(stdout, "\n***** Packet[%dbytes] *****\n", size);
+        PrintEtherHeader(eth_hdr, stdout);
         AnalyzeArp(ptr, lest);
     }
-    else if (ntohs(eh->ether_type) == ETHERTYPE_IP) {
-        fprintf(stderr, "Packet[%dbytes]\n", size);
-        PrintEtherHeader(eh, stdout);
+    else if (ntohs(eth_hdr->ether_type) == ETHERTYPE_IP) {
+        fprintf(stdout, "\n***** Packet[%dbytes] *****\n", size);
+        PrintEtherHeader(eth_hdr, stdout);
         AnalyzeIp(ptr, lest);
     }
-    else if (ntohs(eh->ether_type) == ETHERTYPE_IPV6) {
-        fprintf(stderr, "Packet[%dbytes]\n", size);
-        PrintEtherHeader(eh, stdout);
+    else if (ntohs(eth_hdr->ether_type) == ETHERTYPE_IPV6) {
+        fprintf(stdout, "\n***** Packet[%dbytes] *****\n", size);
+        PrintEtherHeader(eth_hdr, stdout);
         AnalyzeIpv6(ptr, lest);
     }
 
