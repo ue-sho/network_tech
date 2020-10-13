@@ -50,7 +50,7 @@ int DebugPrintf(char *fmt, ...)
 
 /**
  * @brief エラー番号に対応するエラーメッセージを標準エラー出力に出力する
- * @param fmt : 可変長引数
+ * @param msg : 出力メッセージ
  */
 int DebugPerror(char *msg)
 {
