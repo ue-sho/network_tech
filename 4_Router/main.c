@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @brief ルーターの処理に関係する関数群
+ * @brief メイン（ルーター）の処理に関連する関数群の実装ファイル
  */
 
 #include <arpa/inet.h>
@@ -20,10 +20,10 @@
 #include "base.h"
 #include "ip2mac.h"
 #include "netutil.h"
-#include "sendBuf.h"
+#include "send_buf.h"
 
 /**
- * @brief ルーターの設定する構造体
+ * @brief ルーターの設定するための構造体
  */
 typedef struct {
     char *receiving_interface;  //!< 受信元インターフェイス名
@@ -174,11 +174,11 @@ int AnalyzePacket(int device_number, u_char *data, int size)
 
         if (arp_hdr->arp_op == htons(ARPOP_REQUEST)) {
             DebugPrintf("[%d]recv:ARP REQUEST:%dbytes\n", device_number, size);
-            Ip2Mac(device_number, *(in_addr_t *)arp_hdr->arp_spa, arp_hdr->arp_sha);
+            GetIp2Mac(device_number, *(in_addr_t *)arp_hdr->arp_spa, arp_hdr->arp_sha);
         }
         if (arp_hdr->arp_op == htons(ARPOP_REPLY)) {
             DebugPrintf("[%d]recv:ARP REPLY:%dbytes\n", device_number, size);
-            Ip2Mac(device_number, *(in_addr_t *)arp_hdr->arp_spa, arp_hdr->arp_sha);
+            GetIp2Mac(device_number, *(in_addr_t *)arp_hdr->arp_spa, arp_hdr->arp_sha);
         }
     }
     // IPヘッダ
@@ -226,8 +226,8 @@ int AnalyzePacket(int device_number, u_char *data, int size)
                 DebugPrintf("[%d]:recv:myaddr\n", device_number);
                 return (1);
             }
-            IP2MAC *ip2mac = Ip2Mac(another_device_number, ip_hdr->daddr, NULL);
-            if (ip2mac->flag == FLAG_NG || ip2mac->sd.dno != 0) {
+            IP2MAC *ip2mac = GetIp2Mac(another_device_number, ip_hdr->daddr, NULL);
+            if (ip2mac->flag == FLAG_NG || ip2mac->send_data.data_num != 0) {
                 DebugPrintf("[%d]:Ip2Mac:error or sending\n", device_number);
                 AppendSendData(ip2mac, 1, ip_hdr->daddr, data, size);
                 return -1;
@@ -240,8 +240,8 @@ int AnalyzePacket(int device_number, u_char *data, int size)
             DebugPrintf("[%d]:%s to next_router\n", device_number,
                         in_addr_t2str(ip_hdr->daddr, buf, sizeof(buf)));
 
-            IP2MAC *ip2mac = Ip2Mac(another_device_number, next_router.s_addr, NULL);
-            if (ip2mac->flag == FLAG_NG || ip2mac->sd.dno != 0) {
+            IP2MAC *ip2mac = GetIp2Mac(another_device_number, next_router.s_addr, NULL);
+            if (ip2mac->flag == FLAG_NG || ip2mac->send_data.data_num != 0) {
                 DebugPrintf("[%d]:Ip2Mac:error or sending\n", device_number);
                 AppendSendData(ip2mac, 1, next_router.s_addr, data, size);
                 return -1;
