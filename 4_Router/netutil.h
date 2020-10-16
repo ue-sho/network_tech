@@ -6,6 +6,9 @@
 #ifndef NETUTIL_H_
 #define NETUTIL_H_
 
+#include <netinet/in.h>
+#include <sys/socket.h>
+
 char *my_ether_ntoa_r(u_char *hwaddr, char *buf, socklen_t size);
 char *my_inet_ntoa_r(struct in_addr *addr, char *buf, socklen_t size);
 char *in_addr_t2str(in_addr_t addr, char *buf, socklen_t size);

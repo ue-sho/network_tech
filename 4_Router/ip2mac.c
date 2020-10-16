@@ -232,10 +232,10 @@ int BufferSendOne(int device_number, IP2MAC *ip2mac)
         DebugPrintf("write:BufferSendOne:[%d] %dbytes\n", device_number, size);
         write(interface_info[device_number].socket_descriptor, data, size);  // 送信
 
-        DebugPrintf("*************************************[%d]\n", device_number);
-        print_ether_header(&eth_hdr);
-        print_ip(&ip_hdr);
-        DebugPrintf("*************************************[%d]\n", device_number);
+        // DebugPrintf("*************************************[%d]\n", device_number);
+        // print_ether_header(&eth_hdr);
+        // print_ip(&ip_hdr);
+        // DebugPrintf("*************************************[%d]\n", device_number);
     }
 
     return 0;

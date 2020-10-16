@@ -33,7 +33,7 @@ typedef struct {
 } RouterConfig;
 
 //! ルーターの設定
-RouterConfig router_config = {"enp0s8", "enp0s9", 1, "192.168.0.254"};
+RouterConfig router_config = {"enp0s8", "enp0s9", 1, "169.254.238.208"};
 
 //! 上位ルーターのIPアドレスを保持する(16進数)
 struct in_addr next_router;

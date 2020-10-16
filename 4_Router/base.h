@@ -6,6 +6,10 @@
 #ifndef BASE_H_
 #define BASE_H_
 
+#include <netinet/in.h>
+#include <pthread.h>
+#include <time.h>
+
 /**
  * @brief ネットワークインターフェイスの情報
  */
